@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Browser</title>
+    <link rel="stylesheet" href="css/css/font-awesome.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        @font-face {
+            font-family: FiraCode;
+  src: url(FiraCode.ttf);
+}
+
+body {
+    font-family: 'Fira Code', monospace;
+    /* background-color: black; */
+    color: yellowgreen;
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    text-align: center;
+    -webkit-app-region: no-drag;
+}
+
+#tabs{
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 999;
+}
+
+#tabs-container{
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.tab{
+    height: 30px;
+    width: 100%;
+    min-width: 50px;
+    text-align: center;
+    border: 1px solid yellowgreen;
+    background-color: black;
+    border-right: 0;
+    font-weight: bold;
+    line-height: 30px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden
+}
+
+webview{
+    width: 100%;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    display: inline-flex !important;
+}
+
+.tabttitle{
+    pointer-events: none;
+}
+
+#titlebar{
+    height: 30px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    -webkit-app-region: drag;
+    background-color: black;
+}
+
+#url{
+    background-color: black;
+    color: yellowgreen;
+    border: 1px solid yellowgreen;
+    width: 40%;
+    font-family: 'Fira Code', monospace;
+    z-index: 999;
+    margin-right: 10px;
+    margin-left: 10px;
+    -webkit-app-region: no-drag;
+}
+
+#url:focus{
+    outline: 0
+}
+
+#back, #forward, #refresh {
+    margin: 0;
+    width: 36px;
+    border: 1px solid yellowgreen;
+    background-color: black;
+    color: yellowgreen;
+    font-family: 'Fira Code', monospace;
+    margin-left: 10px
+}
+.close{
+    background-color: black;
+    color: yellowgreen;
+    border: 1px solid yellowgreen;
+    font-family: 'Fira Code', monospace;
+    float: right;
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
+#traffic{
+    display: inline-flex;
+    justify-content: right;
+    text-align: center;
+    -webkit-app-region: no-drag;
+}
+
+#min-btn, #max-btn, #close-btn {
+    margin: 0;
+    width: 36px;
+    background-color: black;
+    color: yellowgreen;
+    border: 1px solid yellowgreen;
+    font-family: 'Fira Code', monospace;
+    margin-right: 10px;
+}
+
+#controls{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+
+.smalltab{
+    height: 30px;
+    width: 40px;
+    min-width: 40px;
+    text-align: center;
+    border: 1px solid yellowgreen;
+    font-weight: bold;
+    line-height: 30px;
+    vertical-align: middle;
+    background-color: black;
+}
+
+@media screen and (max-width: 300px){ 
+    nav{
+        display: none;
+    }
+    #traffic {
+        display: none;
+    }
+    #url{
+        position:fixed;
+        left: 50%;
+        transform: translate(-50%);
+        width: 90%;
+    }
+    .close{
+        display: none
+    }
+    #tab{
+        text-overflow: ellipsis;
+    }
+}
+
+
+
+    </style>
+  </head>
+  <body id="browser">
+    <div id="controls">
+    <div id="titlebar">
+        <nav id="navigation">
+            <button id="back">
+             <-
+            </button>
+            <button id="forward">
+              ->
+            </button>
+            <button id="refresh">
+              ⟳
+            </button>
+          
+          </nav>
+    
+   
+        
+    <input type="text" id="url">
+
+    <div id="traffic">
+        <button id="min-btn">-</button>
+       <button id="max-btn">□</button>
+       <button id="close-btn">x</button>
+    </div>
+
+</div>
+<div id="tabs-container">
+<div class="smalltab">☆</div>
+    <div id="tabs">
+        
+      
+    </div>
+    <div id="newTab"  class="smalltab">+</div></div>
+</div>
+ <div id="webviews">
+
+    </div>
+  <script src="renderer.js"></script>
+</html>

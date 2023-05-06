@@ -1,4 +1,5 @@
 let activeTabIndex = -1;
+let totalTabs = 0;
 
 document.getElementById("min-btn").addEventListener("click", function (e) {
   window.electronAPI.min();
@@ -22,12 +23,12 @@ document.getElementById("refresh").addEventListener("click", function (e) {
 
 document.getElementById("back").addEventListener("click", function (e) {
   let webviews = document.getElementById("webviews").children;
-  webviews[activeTabIndex].goBack();
+  [...webviews].find(view => view.dataset.index == activeTabIndex).goBack();
 });
 
 document.getElementById("forward").addEventListener("click", function (e) {
   let webviews = document.getElementById("webviews").children;
-  webviews[activeTabIndex].goForward();
+  [...webviews].find(view => view.dataset.index == activeTabIndex).goForward();
 });
 
 function setTabActiveHandler(e) {
@@ -39,8 +40,6 @@ function setTabActiveHandler(e) {
 
 
 function closeTabHandler(e) {
-  console.log(e);
-  console.log('firfi');
   closeTab(e.target.parentElement);
 }
 
@@ -51,20 +50,26 @@ function setTabActive(toSet) {
   let tabs = document.getElementById("tabs").children;
   
   if (activeTabIndex != -1) {
-    let activeTab = tabs[activeTabIndex];
+    let activeTab = [...tabs].find(tab => tab.dataset.index == activeTabIndex);
     
     activeTab.style.backgroundColor = "black";
     activeTab.style.color = "yellowgreen";
 
     // deactivate webview
-    let activeView = webviews[activeTabIndex];
-    activeView.style.display = "none";
+    let activeView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+    // activeView.style.display = "none";
+    activeView.style.width = "0";
+    activeView.style.height = "0";
+    // activeView.style.flex = "0 1";
 }
 
   // set this one actve
   toSet.style.backgroundColor = "yellowgreen";
   toSet.style.color = "black";
-  webviews[toSet.dataset.index].style.display = "inline-flex !important";
+  // [...webviews].find(view => view.dataset.index == toSet.dataset.index).style.display = "inline-flex !important";
+  [...webviews].find(view => view.dataset.index == toSet.dataset.index).style.width = "100%";
+  [...webviews].find(view => view.dataset.index == toSet.dataset.index).style.height = "100%";
+    // activeView.style.flex = "0 1";
   activeTabIndex = toSet.dataset.index;
 }
 
@@ -77,20 +82,20 @@ function closeTab(tab) {
   }
   if (tab.dataset.index == activeTabIndex) {
     if (activeTabIndex == 0) {
-      setTabActive(tabsChildren[activeTabIndex + 1]);
+      setTabActive([...tabsChildren].find(tab => tab.dataset.index > activeTabIndex));
     } else {
-      setTabActive(tabsChildren[activeTabIndex - 1]);
+      setTabActive([...tabsChildren].reverse().find(tab => tab.dataset.index < activeTabIndex));
     }
   }
   tabs.removeChild(tab);
   //delete webview
-  webviews.removeChild(webviews.children[tab.dataset.index]);
+  // webviews.removeChild([...webviews].find(view => view.dataset.index == tab.dataset.index));
+  [...webviews].find(view => view.dataset.index == tab.dataset.index).remove();
 }
 
 function handleReload(e) {
-  let tabs = document.getElementById("tabs").children;
   let webviews = document.getElementById("webviews").children;
-  webviews[activeTabIndex].reload();
+  [...webviews].find(view => view.dataset.index == activeTabIndex).reload();
 }
 
 function elementFromHTML(str) {
@@ -103,12 +108,10 @@ function createNewTab(url) {
   let tabs = document.getElementById("tabs");
 
   let newTab = elementFromHTML(
-    `<div class="tab"><span class="tabttitle"></span>
-    
-</div>`
+    `<div class="tab"><span class="tabttitle"></span></div>`
   );
   newTab.addEventListener("click", setTabActiveHandler);
-  newTab.dataset.index = tabs.children.length;
+  newTab.dataset.index = totalTabs;
   tabs.appendChild(newTab);
 
   let closeButton = elementFromHTML('<button class="close">X</button>') 
@@ -137,6 +140,8 @@ function createNewWebview(url, tab) {
 newview.addEventListener("did-finish-load", ()=>{
   tab.children[0].innerHTML = newview.getTitle()
 })
+newview.dataset.index = totalTabs;
+totalTabs++;
   webviews.appendChild(newview);
 }
 
@@ -145,9 +150,12 @@ document.onkeydown = async function (e) {
     createNewTab("file://" + await window.electronAPI.dirname() + "/newtab.html");
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "w") {
     let tabs = document.getElementById("tabs").children;
-    closeTab(tabs[activeTabIndex])
+    closeTab([...tabs].find(tab => tab.dataset.index == activeTabIndex))
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "r") {
     handleReload(e);
+  } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() == "i") {
+    let webviews = document.getElementById("webviews").children;
+    [...webviews].find(view => view.dataset.index == activeTabIndex).openDevTools();
   }
 };
 
@@ -169,13 +177,13 @@ document.getElementById("url").addEventListener("keydown", (e) => {
   var strict = /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
   var less = /([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
   if (e.target.value.match(new RegExp(strict))) {
-    webviews[activeTabIndex].loadURL(e.target.value);
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL(e.target.value);
     
   } else if (e.target.value.match(new RegExp(less))) {
-    webviews[activeTabIndex].loadURL("https://" + e.target.value);
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://" + e.target.value);
     e.target.value = "https://" + e.target.value
   } else {
-    webviews[activeTabIndex].loadURL("https://www.google.com/search?q=" + e.target.value);
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://www.google.com/search?q=" + e.target.value);
     e.target.value = "https://www.google.com/search?q=" + e.target.value
   }
  
@@ -184,6 +192,10 @@ document.getElementById("url").addEventListener("keydown", (e) => {
 });
 
 
-//implement url bar
-// imlement back and forwards
 // implement keboard shortcutrs: undo, redo, cut, copy, paste, select all, zoom in, zoom out
+//change url when change tab
+//fix webview component not deleting
+// bookmarks
+//setings with themes
+//autofill in url bar
+// fix when closing tabs it deselects/ selects first  

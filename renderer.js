@@ -22,14 +22,22 @@ document.getElementById("refresh").addEventListener("click", function (e) {
 });
 
 document.getElementById("back").addEventListener("click", function (e) {
-  let webviews = document.getElementById("webviews").children;
-  [...webviews].find(view => view.dataset.index == activeTabIndex).goBack();
+  handleBack(e)
 });
 
 document.getElementById("forward").addEventListener("click", function (e) {
+ handleForward(e);
+});
+
+function handleBack(e) {
+  let webviews = document.getElementById("webviews").children;
+  [...webviews].find(view => view.dataset.index == activeTabIndex).goBack();
+}
+
+function handleForward(e) {
   let webviews = document.getElementById("webviews").children;
   [...webviews].find(view => view.dataset.index == activeTabIndex).goForward();
-});
+}
 
 function setTabActiveHandler(e) {
   if (this != e.target) {
@@ -127,7 +135,7 @@ function createNewTab(url) {
   closeButton.addEventListener("click", closeTabHandler)
   newTab.appendChild(closeButton);
   
-  
+  document.getElementById("url").focus();
   createNewWebview(url, newTab);
   setTabActive(newTab);
 
@@ -140,18 +148,18 @@ function createNewWebview(url, tab) {
     `<webview preload="./viewPreload.js" src="` + url + `" autosize="on"></webview>`
   );
   newview.style = `width: 100%;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 61px);
     position: fixed;
     display: flex;
-    top: 60px;
+    top: 61px;
     left: 0`;
 
 newview.addEventListener("did-finish-load", async ()=>{
-  tab.children[1].innerHTML = newview.getTitle();
+  tab.children[1].innerText = newview.getTitle();
   let domain = new URL(newview.getURL());
   domain = domain.hostname;
-  if (url == "file://" + await window.electronAPI.dirname() + "/newtab.html") {
-    tab.children[0].src = "globe.png"
+  if (newview.getURL() == "file:///" + await window.electronAPI.dirname() + "/newtab.html") {
+    tab.children[0].src = "./globe.png"
   } else {
     tab.children[0].src = `http://www.google.com/s2/favicons?domain=${domain}`;
   }
@@ -160,12 +168,22 @@ newview.addEventListener("did-finish-load", async ()=>{
 newview.addEventListener("context-menu", (e) => {
   let contextmenu = document.getElementById("contextmenu");
   let contextmenuSelect = document.getElementById("contextmenuSelect");
+  if (e.params.x > document.documentElement.clientWidth - 250) {
+    e.params.x -= 250
+  }
+  
   if (e.params.selectionText != ""){
+    if (e.params.y > document.documentElement.clientHeight - 60) {
+      e.params.y -= 60
+    }
   contextmenuSelect.style.display = "block";
   contextmenu.style.display = "none";
   contextmenuSelect.style.top = e.params.y + "px";
   contextmenuSelect.style.left = e.params.x + "px";
 } else {
+  if (e.params.y > document.documentElement.clientHeight - 170) {
+    e.params.y -= 170
+  }
   contextmenu.style.display = "block";
   contextmenuSelect.style.display = "none";
   contextmenu.style.top = e.params.y + "px";
@@ -176,7 +194,8 @@ newview.addEventListener("context-menu", (e) => {
 newview.addEventListener("ipc-message", (e)=>{
   let contextmenu = document.getElementById("contextmenu");
   let contextmenuSelect = document.getElementById("contextmenuSelect");
-  if (e.args.length != 0) { // if is a keypress
+  console.log(e.args)
+  if (e.args.length == 7) { // if is a keypress
     let event = new KeyboardEvent('keydown', {
       code: e.args[0],
       key: e.args[1],
@@ -187,9 +206,11 @@ newview.addEventListener("ipc-message", (e)=>{
       repeat: e.args[6]
     });
     shortcutHandler(event);
-  } else { // if is a click
+  } else if (e.args.length == 0) { // if is a click
     contextmenuSelect.style.display = "none";
     contextmenu.style.display = "none";
+  } else if (e.args.length == 1) {
+    handleURL(e.args[0]);
   }
 })
 
@@ -219,9 +240,7 @@ async function shortcutHandler(e) {
     contextmenuSelect.style.display = "none";
     contextmenu.style.display = "none";
   } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key == "I") {
-    currView.openDevTools();
-    contextmenuSelect.style.display = "none";
-    contextmenu.style.display = "none";
+    handleInspect();
   } else if ((e.ctrlKey || e.metaKey) && e.key == "f") {
     document.getElementById("findMenu").style.display = "block";
     document.getElementById("findInput").focus();
@@ -237,53 +256,85 @@ async function shortcutHandler(e) {
     contextmenuSelect.style.display = "none";
     contextmenu.style.display = "none";
   } else if ((e.ctrlKey || e.metaKey) && e.key == "p") {
-    currView.printToPDF({});
-    contextmenuSelect.style.display = "none";
-    contextmenu.style.display = "none";
+    handlePrint();
   } else if ((e.ctrlKey || e.metaKey) && e.key == "=") {
-    currView.setZoomFactor(currView.getZoomFactor()+0.1)
-    document.getElementById("currentZoom").innerText = Math.round(currView.getZoomFactor() * 100) + "%"
-    document.getElementById("zoomMenu").style.display = "block";
-    setTimeout(() => {document.getElementById("zoomMenu").style.display = "none"}, 3000)
-    contextmenuSelect.style.display = "none";
-    contextmenu.style.display = "none";
+    handleZoom(0.1);
   } else if ((e.ctrlKey || e.metaKey) && e.key == "-") {
-    currView.setZoomFactor(currView.getZoomFactor()-0.1)
-    document.getElementById("currentZoom").innerText = Math.round(currView.getZoomFactor() * 100) + "%"
-    document.getElementById("zoomMenu").style.display = "block";
-    setTimeout(() => {document.getElementById("zoomMenu").style.display = "none"}, 3000)
-    contextmenuSelect.style.display = "none";
-    contextmenu.style.display = "none";
+    handleZoom(-0.1);
   }
   
 };
 
+function handlePrint() {
+  let contextmenu = document.getElementById("contextmenu");
+  let contextmenuSelect = document.getElementById("contextmenuSelect");
+  let webviews = document.getElementById("webviews").children;
+  let currView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+  currView.printToPDF({});
+  contextmenuSelect.style.display = "none";
+  contextmenu.style.display = "none";
+}
+
+function handleInspect(x, y) {
+   let contextmenu = document.getElementById("contextmenu");
+  let contextmenuSelect = document.getElementById("contextmenuSelect");
+  let webviews = document.getElementById("webviews").children;
+  let currView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+
+  if (x && y) {
+    currView.inspectElement(x, y);
+  } else {
+    currView.openDevTools();
+  }
+  
+    contextmenuSelect.style.display = "none";
+    contextmenu.style.display = "none";
+}
+
+function handleZoom(change) {
+  let contextmenu = document.getElementById("contextmenu");
+  let contextmenuSelect = document.getElementById("contextmenuSelect");
+  let webviews = document.getElementById("webviews").children;
+  let currView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+  currView.setZoomFactor(currView.getZoomFactor()+ change)
+  document.getElementById("currentZoom").innerText = Math.round(currView.getZoomFactor() * 100) + "%"
+  document.getElementById("zoomMenu").style.display = "block";
+  let timeout = setTimeout(() => {document.getElementById("zoomMenu").style.display = "none"}, 5000)
+  contextmenuSelect.style.display = "none";
+  contextmenu.style.display = "none";
+}
+
 (async function() {
-  // createNewTab("file://" + await window.electronAPI.dirname() + "/newtab.html");
-  createNewTab("https://youtube.com");
+  createNewTab("file://" + await window.electronAPI.dirname() + "/newtab.html");
+  // createNewTab("https://youtube.com");
 })();
 
-
-
-document.getElementById("url").addEventListener("keydown", (e) => {
-  let tabs = document.getElementById("tabs").children;
-  if (e.key == "Enter") {
-  // change src of webview
-  // change tab name
+function handleURL(url) {
+  let urlInput = document.getElementById("url");
+  urlInput.value = url;
   let webviews = document.getElementById("webviews").children;
   var strict = /(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
   var less = /([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
-  if (e.target.value.match(new RegExp(strict))) {
-    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL(e.target.value);
+  if (url.match(new RegExp(strict))) {
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL(url);
     
-  } else if (e.target.value.match(new RegExp(less))) {
-    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://" + e.target.value);
-    e.target.value = "https://" + e.target.value
+  } else if (url.match(new RegExp(less))) {
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://" + url);
+    urlInput.value = "https://" + url;
   } else {
-    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://www.google.com/search?q=" + e.target.value);
-    e.target.value = "https://www.google.com/search?q=" + e.target.value
+    [...webviews].find(view => view.dataset.index == activeTabIndex).loadURL("https://www.google.com/search?q=" + url);
+    urlInput.value = "https://www.google.com/search?q=" + url;
   }
- 
+  let tabs = document.getElementById("tabs").children;
+  [...tabs].find(tab => tab.dataset.index == activeTabIndex).dataset.url = urlInput.value;
+}
+
+document.getElementById("url").addEventListener("keydown", (e) => {
+  
+  if (e.key == "Enter") {
+
+  handleURL(e.target.value);
+  
   
 }
 });
@@ -331,17 +382,59 @@ document.body.addEventListener("click", (e) => {
   }
 })
 
+document.getElementById("contextBack").addEventListener("click", (e)=>{
+  handleBack(e);
+})
+
+document.getElementById("contextForward").addEventListener("click", (e)=>{
+  handleForward(e);
+})
+
+document.getElementById("contextReload").addEventListener("click", (e)=>{
+  handleReload(e);
+})
+
+document.getElementById("contextPrint").addEventListener("click", (e)=>{
+  handlePrint();
+})
+
+document.getElementById("contextSource").addEventListener("click", (e)=>{
+  let webviews = document.getElementById("webviews").children;
+  let currView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+  createNewTab("view-source:" + currView.getURL());
+})
+
+document.getElementById("contextInspect").addEventListener("click", (e)=>{
+   let contextmenu = document.getElementById("contextmenu");
+   handleInspect(parseInt(contextmenu.style.left, 10), parseInt(contextmenu.style.top, 10));
+})
+
+document.getElementById("contextCopy").addEventListener("click", (e)=>{
+  let webviews = document.getElementById("webviews").children;
+  let currView = [...webviews].find(view => view.dataset.index == activeTabIndex);
+  currView.copy();
+})
+
+document.getElementById("contextSelectInspect").addEventListener("click", (e)=>{
+  let contextmenu = document.getElementById("contextmenu");
+  handleInspect(parseInt(contextmenu.style.left, 10), parseInt(contextmenu.style.top, 10));
+})
+
+document.getElementById("zoomInButton").addEventListener("click", ()=>{
+  handleZoom(0.1);
+})
+
+document.getElementById("zoomOutButton").addEventListener("click", ()=>{
+  handleZoom(-0.1);
+})
 
 
 
 
 //draggable tabs
+//settings menu with themes and history
 // bookmarks
 //autofill in url bar
-// fix when closing tabs it selects first tab  
-//right click dropdown menu
-// fix print to pdf
+// download manager
 
-//buttons in zoom menu
-//settings menu with themes and history
-//open 
+// fix print to pdf

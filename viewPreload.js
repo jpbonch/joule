@@ -1,7 +1,7 @@
 window.onload = function () {
   const { ipcRenderer } = require("electron");
 
-  document.body.addEventListener("click", (e) => {
+  document.addEventListener("click", (e) => {
     ipcRenderer.sendToHost("ipc-message");
   });
 
@@ -17,5 +17,11 @@ window.onload = function () {
       e.metaKey,
       e.repeat
     );
-  };
+  }
+
+  document.getElementById("mainSearch").addEventListener("keydown", (e)=>{
+    if (e.key == "Enter") {
+        ipcRenderer.sendToHost("ipc-message", e.target.value);
+    }
+})
 };

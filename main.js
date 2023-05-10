@@ -3,6 +3,7 @@ const path = require("path");
 
 const createWindow = () => {
   const win = new BrowserWindow({
+    icon: path.join(__dirname, "/icon.ico"),
     autoHideMenuBar: true,
     webPreferences: {
       webviewTag: true,

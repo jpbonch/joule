@@ -57,14 +57,17 @@ nav{
     line-height: 40px;
     vertical-align: middle;
     white-space: nowrap;
-    overflow: hidden
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 webview{
     width: 100%;
     height: 100%;
     position: fixed;
-    top: 60px;
+    top: 61px;
     left: 0;
     display: inline-flex !important;
 }
@@ -113,9 +116,8 @@ webview{
     color: yellowgreen;
     border: 1px solid yellowgreen;
     font-family: 'Fira Code', monospace;
-    float: right;
-    margin-top: 5px;
-    margin-right: 5px;
+    margin-left: auto;
+    margin-right: 10px;
 }
 
 #traffic{
@@ -142,6 +144,7 @@ webview{
     width: 100%;
     -webkit-user-select: none;
     user-select: none;
+    border-bottom: 1px solid yellowgreen;
 }
 
 
@@ -172,7 +175,7 @@ webview{
 #currentZoom {
     position: absolute;
     top: 10px;
-    left: 5px;
+    left: 10px;
     outline: 0;
     color: yellowgreen;
     font-family: 'Fira Code', monospace;
@@ -223,7 +226,7 @@ webview{
 .favicon{
     width: 15px;
     height: 15px;
-    margin-left: -10px;
+    margin-left: auto;
     padding: 4px;
     display: inline-block;
 }
@@ -236,6 +239,8 @@ webview{
     top:0;
     left: 0;
     display: none;
+    border: 2px solid yellowgreen;
+    width: 250px;
 }
 
 @media screen and (max-width: 300px){ 
@@ -257,6 +262,35 @@ webview{
     #tab{
         text-overflow: ellipsis;
     }
+}
+
+.contextButton{
+    padding: 5px;
+}
+
+.contextButton:hover{
+    cursor: default;
+    background-color: #486017;
+}
+
+#navigation > button:hover{
+    background-color: #486017;
+}
+
+#traffic > button:hover{
+    background-color: #486017;
+}
+
+#zoomInButton, #zoomOutButton{
+    background-color: black;
+    color: yellowgreen;
+    border: 1px solid yellowgreen;
+}
+
+.zoomButtonDiv{
+    position: absolute;
+    right: 5px;
+    top: 10px;
 }
 
 
@@ -291,7 +325,7 @@ webview{
 
 </div>
 <div id="tabs-container">
-<div class="smalltab">☆</div>
+<!-- <div class="smalltab">☆</div> -->
     <div id="tabs">
         
       
@@ -308,19 +342,22 @@ webview{
 </div>
 <div id="zoomMenu">
     <span id="currentZoom"></span>
+    <div class="zoomButtonDiv">
+    <button id="zoomInButton">+</button>
+    <button id="zoomOutButton">-</button>
+    </div>
 </div>
 <div id="contextmenu">
-    <div>Back</div>
-    <div>Forward</div>
-    <div>Reload</div>
-    <div>Print</div>
-    <div>View page source</div>
-    <div>Inspect</div>
+    <div class="contextButton" id="contextBack">Back</div>
+    <div class="contextButton" id="contextForward">Forward</div>
+    <div class="contextButton" id="contextReload">Reload</div>
+    <div class="contextButton" id="contextPrint">Print</div>
+    <div class="contextButton" id="contextSource">View page source</div>
+    <div class="contextButton" id="contextInspect">Inspect</div>
 </div>
 <div id="contextmenuSelect">
-    <div>Copy</div>
-    <div>Search Google</div>
-    <div>Inspect</div>
+    <div class="contextButton" id="contextCopy">Copy</div>
+    <div class="contextButton" id="contextSelectInspect">Inspect</div>
 </div>
  <div id="webviews">
 

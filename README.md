@@ -1,0 +1,1 @@
+Browser built with Electronjs, taking advantage of web technologies to build a browser interface.

@@ -10,10 +10,9 @@
   },
   "author": "jpbonch",
   "license": "ISC",
-  "dependencies": {
-    "electron": "^24.1.3"
-  },
   "devDependencies": {
+    "electron": "^24.1.3",
+    "electron-packager": "^17.1.1",
     "nodemon": "^2.0.22"
   }
 }

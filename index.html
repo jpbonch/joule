@@ -54,7 +54,7 @@ nav{
     background-color: black;
     border-right: 0;
     font-weight: bold;
-    line-height: 30px;
+    line-height: 40px;
     vertical-align: middle;
     white-space: nowrap;
     overflow: hidden
@@ -157,6 +157,87 @@ webview{
     background-color: black;
 }
 
+#zoomMenu{
+    position: fixed;
+    left: 15px;
+    top: 70px;
+    width: 250px;
+    height: 40px;
+    z-index: 999;
+    background-color: black;
+    display: none;
+    border: 1px solid yellowgreen
+}
+
+#currentZoom {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    outline: 0;
+    color: yellowgreen;
+    font-family: 'Fira Code', monospace;
+}
+
+#findMenu{
+    position: fixed;
+    right: 15px;
+    top: 70px;
+    width: 250px;
+    height: 40px;
+    z-index: 999;
+    background-color: black;
+    display: none;
+    border: 1px solid yellowgreen
+}
+
+#findInput {
+    width: 150px;
+    height: 20px;
+    border: 0;
+    border-bottom: 2px solid yellowgreen;
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    outline: 0;
+    background-color: black;
+    color: yellowgreen;
+    font-family: 'Fira Code', monospace;
+}
+
+#findInput:focus{
+    outline: 0
+}
+
+.findMenuButton{
+    background-color: black;
+    color: yellowgreen;
+    border: 1px solid yellowgreen;
+}
+
+.findMenuButtonDiv{
+    position: absolute;
+    right: 5px;
+    top: 10px;
+}
+
+.favicon{
+    width: 15px;
+    height: 15px;
+    margin-left: -10px;
+    padding: 4px;
+    display: inline-block;
+}
+
+#contextmenu, #contextmenuSelect {
+    position: absolute;
+    background-color: black;
+    color: yellowgreen;
+    z-index: 999;
+    top:0;
+    left: 0;
+    display: none;
+}
+
 @media screen and (max-width: 300px){ 
     nav{
         display: none;
@@ -183,7 +264,7 @@ webview{
     </style>
   </head>
   <body id="browser">
-    <div id="controls">
+    <div id="controls" onblur="this.focus()" autofocus>
     <div id="titlebar">
         <nav id="navigation">
             <button id="back">
@@ -216,6 +297,30 @@ webview{
       
     </div>
     <div id="newTab"  class="smalltab">+</div></div>
+</div>
+<div id="findMenu">
+    <input type="text" id="findInput"/>
+    <div class="findMenuButtonDiv">
+    <button id="findNext" class="findMenuButton">v</button>
+    <button id="findPrev" class="findMenuButton">^</button>
+    <button id="closeFindMenu" class="findMenuButton">x</button>
+    </div>
+</div>
+<div id="zoomMenu">
+    <span id="currentZoom"></span>
+</div>
+<div id="contextmenu">
+    <div>Back</div>
+    <div>Forward</div>
+    <div>Reload</div>
+    <div>Print</div>
+    <div>View page source</div>
+    <div>Inspect</div>
+</div>
+<div id="contextmenuSelect">
+    <div>Copy</div>
+    <div>Search Google</div>
+    <div>Inspect</div>
 </div>
  <div id="webviews">
 
